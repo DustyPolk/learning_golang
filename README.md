@@ -53,12 +53,3 @@ type User struct {
 ```
 
 **Rule of thumb**: If you find yourself passing the same 3+ variables to multiple functions, consider making them a struct.
-
-## Running the Code
-
-```bash
-go run cmd/myapp/filename.go
-```
-```
-
-This README is concise, beginner-friendly, and gives a clear understanding of structs and their practical applications!
