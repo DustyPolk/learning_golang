@@ -8,27 +8,10 @@ import (
 // This is a simple example of a struct in Go.
 // A struct is a collection of fields.
 // A field is a variable that is part of a struct.
-// A field is a variable that is part of a struct.
 type Person struct {
-	Name         string
-	Age          int
-	City         string
-	Sport        string
-	Strength     int
-	Speed        int
-	Agility      int
-	Endurance    int
-	Intelligence int
-	Creativity   int
-	Teamwork     int
-	Leadership   int
-	Health       int
-}
-
-// This is a method of the Person struct.
-// A method is a function that is part of a struct.
-func (p Person) String() string {
-	return fmt.Sprintf("%v (%v years old) from %v, %v", p.Name, p.Age, p.City, p.Sport)
+	Name     string
+	Strength int
+	Health   int
 }
 
 // This is a function that is not part of the Person struct.
@@ -60,33 +43,63 @@ func calculateDamage(p Person) int {
 func takeDamage(p *Person, damage int) {
 	p.Health -= damage
 	if p.Health <= 0 {
-		death(p)
+		p.Health = 0
+		fmt.Println(p.Name, "is dead!")
 	}
 }
 
-func death(p *Person) {
-	p.Health = 0
-	fmt.Println(p.Name, "is dead!")
+func decideWhoAttacksFirst(p1 *Person, p2 *Person) *Person {
+	// Roll 3 times for each player
+	p1Rolls := 0
+	p2Rolls := 0
+
+	for range 3 {
+		p1Roll := rand.Intn(20) + 1
+		p2Roll := rand.Intn(20) + 1
+
+		if p1Roll > p2Roll {
+			p1Rolls++
+		} else if p2Roll > p1Roll {
+			p2Rolls++
+		}
+	}
+
+	// Return the player who won more rolls
+	if p1Rolls > p2Rolls {
+		return p1
+	}
+	return p2
 }
 
 func fightToDeath(p1 *Person, p2 *Person) {
-	fmt.Printf("Fight to the death begins: %s vs %s!\n", p1.Name, p2.Name)
+	attacker := decideWhoAttacksFirst(p1, p2)
+	fmt.Printf("%s wins the roll! Gets to attack first!\n", attacker.Name)
 
 	for p1.Health > 0 && p2.Health > 0 {
-		// Player 1 attacks Player 2
-		if p1.Health > 0 {
+		// First attacker goes
+		if attacker == p1 && p1.Health > 0 {
 			damage := calculateDamage(*p1)
 			fmt.Printf("%s attacks %s for %d damage!\n", p1.Name, p2.Name, damage)
 			takeDamage(p2, damage)
 			fmt.Printf("%s health: %d\n", p2.Name, p2.Health)
-		}
-
-		// Player 2 attacks Player 1 (if still alive)
-		if p2.Health > 0 {
+		} else if attacker == p2 && p2.Health > 0 {
 			damage := calculateDamage(*p2)
 			fmt.Printf("%s attacks %s for %d damage!\n", p2.Name, p1.Name, damage)
 			takeDamage(p1, damage)
 			fmt.Printf("%s health: %d\n", p1.Name, p1.Health)
+		}
+
+		// Second attacker goes (if still alive)
+		if attacker == p1 && p2.Health > 0 {
+			damage := calculateDamage(*p2)
+			fmt.Printf("%s attacks %s for %d damage!\n", p2.Name, p1.Name, damage)
+			takeDamage(p1, damage)
+			fmt.Printf("%s health: %d\n", p1.Name, p1.Health)
+		} else if attacker == p2 && p1.Health > 0 {
+			damage := calculateDamage(*p1)
+			fmt.Printf("%s attacks %s for %d damage!\n", p1.Name, p2.Name, damage)
+			takeDamage(p2, damage)
+			fmt.Printf("%s health: %d\n", p2.Name, p2.Health)
 		}
 
 		fmt.Println("---")
@@ -105,44 +118,20 @@ func main() {
 	// This is a struct literal.
 	// A struct literal is a literal that is used to create a struct.
 	p1 := Person{
-		Name:         "Allison",
-		Age:          24,
-		City:         "Denver",
-		Sport:        "Powerlifter",
-		Strength:     80,
-		Speed:        70,
-		Agility:      80,
-		Endurance:    80,
-		Intelligence: 100,
-		Creativity:   80,
-		Teamwork:     80,
-		Leadership:   80,
-		Health:       100,
+		Name:     "Allison",
+		Strength: 80,
+		Health:   100,
 	}
 
 	// This is a struct literal.
 	// A struct literal is a literal that is used to create a struct.
 	p2 := Person{
-		Name:         "Dustin",
-		Age:          20,
-		City:         "Denver",
-		Sport:        "Football",
-		Strength:     100,
-		Speed:        100,
-		Agility:      100,
-		Endurance:    100,
-		Intelligence: 80,
-		Creativity:   80,
-		Teamwork:     80,
-		Leadership:   80,
-		Health:       100,
+		Name:     "Dustin",
+		Strength: 100,
+		Health:   100,
 	}
 
 	// This is a function call.
 	// A function call is a function that is called.
-	takeDamage(&p1, 10)
-	takeDamage(&p2, 10)
-	fmt.Println(p1.Health)
-	fmt.Println(p2.Health)
 	fightToDeath(&p1, &p2)
 }
