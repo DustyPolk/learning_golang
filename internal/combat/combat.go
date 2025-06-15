@@ -12,6 +12,8 @@ type Person struct {
 	Name     string
 	Strength int
 	Health   int
+	MP       int // Magic Points for casting spells
+	MaxMP    int // Maximum Magic Points
 	// New defensive stats
 	Defense int // Reduces incoming damage
 	Armor   int // Additional damage reduction
@@ -108,6 +110,49 @@ func DecideWhoAttacksFirst(p1 *Person, p2 *Person) *Person {
 		return p1
 	}
 	return p2
+}
+
+// DetermineFirstAttacker determines which person's name attacks first
+func DetermineFirstAttacker(p1 *Person, p2 *Person) string {
+	firstAttacker := DecideWhoAttacksFirst(p1, p2)
+	return firstAttacker.Name
+}
+
+// CalculateDamage exported for game package - returns damage, isCritical, isDodged
+func CalculateDamageWithInfo(attacker *Person, defender *Person) (int, bool, bool) {
+	// Check for dodge first
+	dodgeRoll := rand.Intn(100)
+	if dodgeRoll < defender.Dodge {
+		return 0, false, true // No damage, not critical, was dodged
+	}
+
+	attackRoll := dice.D20()
+	baseDamage := dice.D6()
+	strengthMod := attacker.Strength / 20
+	totalDamage := baseDamage + strengthMod
+
+	if attackRoll == 1 {
+		return 0, false, false // Critical miss
+	}
+
+	isCritical := false
+	if attackRoll == 20 {
+		damage := dice.RollMultiple(2, 6)
+		totalDamage = int(float64(damage) * 1.5)
+		isCritical = true
+	} else {
+		damageMultiplier := 0.6 + (float64(attackRoll) / 40.0)
+		totalDamage = int(float64(totalDamage) * damageMultiplier)
+	}
+
+	// Apply defense
+	damageReduction := (defender.Defense / 20) + (defender.Armor / 15)
+	totalDamage -= damageReduction
+	if totalDamage < 1 {
+		totalDamage = 1
+	}
+
+	return totalDamage, isCritical, false
 }
 
 // FightToDeath handles a fight between two people
