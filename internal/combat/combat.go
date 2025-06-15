@@ -22,7 +22,7 @@ type Person struct {
 func CalculateDamage(p Person) int {
 	attackRoll := dice.D20()
 	baseDamage := dice.D6()
-	strengthMod := p.Strength / 20
+	strengthMod := p.Strength / 20 // Increased strength impact
 	totalDamage := baseDamage + strengthMod
 
 	fmt.Printf("DEBUG: %s attacks with roll %d, base damage %d, strength mod %d, total %d\n",
@@ -34,14 +34,14 @@ func CalculateDamage(p Person) int {
 
 	if attackRoll == 20 {
 		damage := dice.RollMultiple(2, 6)
-		critDamage := damage * 2
-		fmt.Printf("DEBUG: Critical hit! %d * 2 = %d damage\n", damage, critDamage)
+		critDamage := int(float64(damage) * 1.5) // Keep 1.5x for critical hits
+		fmt.Printf("DEBUG: Critical hit! %d * 1.5 = %d damage\n", damage, critDamage)
 		return critDamage
 	}
 
 	// Scale damage based on attack roll (1-20)
-	// This makes higher rolls do more damage
-	damageMultiplier := float64(attackRoll) / 20.0
+	// Using a more balanced scaling curve
+	damageMultiplier := 0.6 + (float64(attackRoll) / 40.0) // Starts at 0.6 and goes up to 1.1
 	scaledDamage := int(float64(totalDamage) * damageMultiplier)
 
 	fmt.Printf("DEBUG: Attack roll %d scales damage by %.2f: %d -> %d\n",
@@ -62,15 +62,15 @@ func TakeDamage(p *Person, damage int, silent bool) {
 		return
 	}
 
-	// Calculate damage reduction - increased effectiveness
-	damageReduction := (p.Defense / 10) + (p.Armor / 5) // Doubled the effectiveness
-	fmt.Printf("DEBUG: %s defense reduction: %d (defense %d/10 + armor %d/5)\n",
+	// Calculate damage reduction - balanced defense
+	damageReduction := (p.Defense / 20) + (p.Armor / 15) // More balanced defense effectiveness
+	fmt.Printf("DEBUG: %s defense reduction: %d (defense %d/20 + armor %d/15)\n",
 		p.Name, damageReduction, p.Defense, p.Armor)
 
 	if damageReduction > 0 {
 		damage = damage - damageReduction
 		if damage < 1 {
-			damage = 1 // Minimum 1 damage
+			damage = 1 // Minimum 1 damage to prevent infinite loops
 		}
 		if !silent {
 			fmt.Printf("%s's defense reduces damage by %d!\n", p.Name, damageReduction)

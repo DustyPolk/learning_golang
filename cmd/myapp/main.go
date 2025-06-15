@@ -2,18 +2,23 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
+	"time"
 
 	"github.com/dustypolk/learning_golang/internal/combat"
 )
 
 func main() {
+	// Initialize random seed
+	rand.Seed(time.Now().UnixNano())
+	
 	p1 := combat.Person{
 		Name:     "Allison",
-		Strength: 90,
-		Health:   150,
-		Defense:  80,
-		Armor:    80,
-		Dodge:    40,
+		Strength: 80,
+		Health:   110,
+		Defense:  25,
+		Armor:    20,
+		Dodge:    20,
 	}
 
 	p2 := combat.Person{
@@ -21,8 +26,8 @@ func main() {
 		Strength: 100,
 		Health:   100,
 		Defense:  20,
-		Armor:    20,
-		Dodge:    5,
+		Armor:    15,
+		Dodge:    10,
 	}
 
 	// Run a single fight with output
@@ -36,7 +41,7 @@ func main() {
 
 	for i := 0; i < 100; i++ {
 		// Reset health for each fight
-		p1.Health = 150
+		p1.Health = 110
 		p2.Health = 100
 
 		combat.FightToDeath(&p1, &p2, true)
